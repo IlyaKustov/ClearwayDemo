@@ -14,7 +14,6 @@ export class CommentText extends CommentBase {
 
     override init(data: CommentData) {
         super.init(data);
-        console.debug("[DocumentComponent] Init", data.param);
         (this.obj as Textbox).set('text', data.param);
         (this.obj as FabricObject).skewX
 

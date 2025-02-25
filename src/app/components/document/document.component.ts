@@ -105,8 +105,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
         return new Observable(observer=>{
             this.modalRef = this.modalService.show(this.dialogTemplate);
             this.modalRef.onHidden?.subscribe(res=>{
-                console.log("USER SELECTED", this.userSelected);
-
                 if(this.userSelected == "cancel") {
                     observer.next(false);
                     observer.complete();
@@ -201,8 +199,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
         let op = () => {
             cur++;
             if (cur >= all) {
-                console.debug("ALL LOAD", this.imagesMap);
-
                 this.imagesMap.forEach((image: FabricImage) => {
                     if (image.width > this.maxWidth) {
                         this.maxWidth = image.width;
@@ -213,8 +209,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
 
                 this.maxWidth += 20;
                 this.maxHeight += 20;
-
-                console.debug(`SIZES-> maxWidth${this.maxWidth} height=${this.maxHeight}`);
 
                 this.canvasService.setMaxDimensions(this.maxWidth, this.maxHeight);
 
@@ -249,7 +243,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
         if (doc?.id != null || doc?.id != undefined) {
             this.docsService.GetAllCommentsForDocument(doc?.id).subscribe({
                 next: (docs) => {
-                    console.log("[GetAllCommentsForDocument]", docs);
                     if (docs && docs.length)
                         this.canvasService.loadComments(docs[0].data);
 
@@ -299,8 +292,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
         let reader = new FileReader();
 
         reader.onloadend = (param) => {
-            console.info("PICTURE LOAD", param.target?.result);
-
             this.canvasService.CommentParam = <string>param.target?.result;
 
             if (this.fileSelector)
@@ -328,7 +319,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
 
             this.docsService.SaveCommentsForDocument(docComm).subscribe({
                 next: (doc) => {
-                    console.debug("SAVED", doc);
                     this.isChanged = false;
                 },
                 error: (error) => {

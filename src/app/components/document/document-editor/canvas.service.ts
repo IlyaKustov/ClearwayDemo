@@ -48,8 +48,6 @@ export class CanvasService implements OnDestroy {
             let objs = this.canvas?.getActiveObjects();
             if (objs) {
                 if (event.code === 'Delete') {
-                    console.warn("DELETE", objs);
-
                     if (objs.length == 1 && objs[0] instanceof Textbox && (objs[0] as Textbox).isEditing) return;
 
                     objs.forEach(obj => {
@@ -69,7 +67,6 @@ export class CanvasService implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        console.log("CanvasService ngOnDestroy");
         this._subs.unsubscribe();
     }
 
