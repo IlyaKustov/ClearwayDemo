@@ -1,0 +1,9 @@
+<div style="position: absolute; top: 0; right: 0; left:0; opacity: 0.97;z-index:1000; pointer-events: none">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-start">
+        <div *ngFor="let alert of _alertsService.items" style="min-width: 50%; max-width: 100%; text-align: center; overflow: hidden; pointer-events: auto">
+            <alert [type]="alert.type" [dismissOnTimeout]="alert.dismissOnTimeout" [dismissible]="alert.dismissible">
+                <div *ngIf="alert.text" style="white-space:pre-wrap">{{ alert.text}}</div>
+            </alert>
+        </div>
+    </div>
+</div>

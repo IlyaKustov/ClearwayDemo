@@ -1,0 +1,21 @@
+<div class="d-flex flex-column vh-100" style="overflow: hidden; justify-content: stretch;">
+
+  <div class="card bg-info">
+    <div class="card-body d-flex flex-row justify-content-between">
+      <p class="h3" style="color: white">Open document</p>
+    </div>
+  </div>
+  <div style="background: white">
+    <div class="d-flex flex-column justify-content-center" style="align-items: center">
+      <p class="h4">Files on the server:</p>
+        <div class="list-group" style="min-width: 400px">
+          <ng-container class="list-group" *ngFor="let doc of docList();let i = index" >
+            <button type="button" class="list-group-item list-group-item-action p-3" (click)="onItemClick(doc)">
+              <i class="bi bi-file-richtext"></i>
+              {{doc.name}}
+            </button>
+          </ng-container>
+        </div>
+    </div>
+  </div>
+</div>

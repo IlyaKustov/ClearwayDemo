@@ -1,0 +1,81 @@
+<div class="d-flex flex-column vh-100 bg-secondary" style="overflow: hidden">
+
+  <div class="card bg-info">
+    <div class="card-body d-flex flex-row justify-content-between">
+
+        <p class="h3" style="color: white">
+          <i class="bi bi-arrow-left-circle" style="margin-right: 10px" (click)="onNavigateBack()"></i>
+          {{Document()?.name}}
+        </p>
+
+
+      <div>
+          <input #fileSelector type="file" style="display:none" (change)="loadLocalFile($event)">
+
+          <label class="btn btn-primary ms-1"
+                 [btnRadio]="CommentType.Text"
+                 [uncheckable]="true" role="button"
+                 [(ngModel)]="CreateCommentOnMouseDown" tabindex="-1">
+            <i class="bi bi-chat-square-text"></i>
+          </label>
+          <label class="btn btn-primary ms-1"
+                 [btnRadio]="CommentType.Highlight"
+                 [uncheckable]="true" role="button"
+                 [(ngModel)]="CreateCommentOnMouseDown" tabindex="-1">
+              <i class="bi bi-highlighter"></i>
+          </label>
+
+          <label class="btn btn-primary ms-1"
+                 [btnRadio]="CommentType.Image"
+                 [uncheckable]="true" role="button"
+                 (click)="selectFile()"
+                 [(ngModel)]="CreateCommentOnMouseDown" tabindex="-1">
+              <i class="bi bi-card-image"></i>
+          </label>
+
+        <span class="h6 ms-5" style="margin-right: 5px">{{Zoom()}}%</span>
+
+        <button type="button" class="btn btn-secondary ms-1" (click)="zoomIn()">
+          <i class="bi bi-zoom-in"></i>
+        </button>
+        <button type="button" class="btn btn-secondary ms-1" (click)="zoomOut()">
+          <i class="bi bi-zoom-out"></i>
+        </button>
+        <button type="button" class="btn btn-secondary ms-1" (click)="zoom100()">
+          1:1
+        </button>
+
+        <button type="button" class="btn btn-success" style="margin-left: 10px" (click)="saveComments()">
+          <i class="bi bi-floppy"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex flex-fill" style="position: relative">
+    <div #mainContainer class="mx-auto  bg-secondary" style="position: absolute; top: 0; bottom: 0; width: 100%; height: 100%">
+      <canvas #docCanvas tabindex="0"></canvas>
+
+    </div>
+  </div>
+
+</div>
+
+<ng-template #dialogTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Save changes</h4>
+        <button type="button" class="btn-close close pull-right" aria-label="Close" (click)="modalRef?.hide()">
+            <span aria-hidden="true" class="visually-hidden">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body" >
+        There are unsaved changes. Save comments for the document?
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary m-2" (click)="yes()">Yes</button>
+        <button type="button" class="btn btn-outline-primary m-2" (click)="no()">No</button>
+        <button type="button" class="btn btn-outline-secondary m-2" (click)="cancel()">Cancel</button>
+    </div>
+</ng-template>
+
+
