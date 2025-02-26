@@ -8,9 +8,13 @@
   <div style="background: white">
     <div class="d-flex flex-column justify-content-center" style="align-items: center">
       <p class="h4">Files on the server:</p>
+        <div *ngIf="documentsStore.Error()" class="text-danger">
+            {{documentsStore.Error()}}
+        </div>
+
         <div class="list-group" style="min-width: 400px">
-          <ng-container class="list-group" *ngFor="let doc of docList();let i = index" >
-            <button type="button" class="list-group-item list-group-item-action p-3" (click)="onItemClick(doc)">
+          <ng-container class="list-group" *ngFor="let doc of documentsStore.Documents();let i = index" >
+            <button type="button" class="list-group-item list-group-item-action p-3" (click)="documentsStore.selectDocument(doc)">
               <i class="bi bi-file-richtext"></i>
               {{doc.name}}
             </button>

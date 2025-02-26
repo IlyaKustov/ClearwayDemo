@@ -35,44 +35,35 @@ import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
     styleUrl: './document.component.css'
 })
 export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanDeactivateComponent {
+    public Zoom = createComputed(() => Math.round(this.canvasService.ZoomLevel() * 100));
 
     protected Document = signal<Document | null | undefined>(null);
-    public Zoom = createComputed(() => Math.round(this.canvasService.ZoomLevel() * 100));
     protected CreateCommentOnMouseDown: WritableSignal<CommentType>;
-
     protected readonly CommentType = CommentType;
+    protected modalRef?: BsModalRef;
+    protected userSelected : 'yes' | 'no' | 'cancel' = 'yes'
 
     @ViewChild('docCanvas')
     canvasT: ElementRef | undefined;
-
     @ViewChild('mainContainer')
     private _mainContainer: ElementRef | undefined
-
     @ViewChild('fileSelector')
     private fileSelector: ElementRef | undefined;
+    @ViewChild('dialogTemplate')
+    private dialogTemplate: any;
 
     private imagesMap: Map<number, FabricImage> = new Map();
     private maxWidth: number = 0;
     private maxHeight: number = 0;
-
     private canvas: Canvas | undefined;
-
     private canvasService: CanvasService = inject(CanvasService);
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private docsService: DocumentsService = inject(DocumentsService);
     private router: Router = inject(Router);
     private alertsService: AlertsService = inject(AlertsService);
-
     private modalService: BsModalService = inject(BsModalService);
     private titleService: Title = inject(Title);
-
     private _subs: Subscription;
-
-    protected modalRef?: BsModalRef;
-    @ViewChild('dialogTemplate')
-    private dialogTemplate: any;
-
-    protected isChanged:boolean = false;
 
     constructor() {
         this.CreateCommentOnMouseDown = this.canvasService.CreateCommentOnMouseDown;
@@ -84,63 +75,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
             }
         })
     }
-
-    canDeactivate(): Observable<boolean> | boolean{
-        //переход
-        if(this.isChanged)
-            return this.openModal();
-        else return true;
-    }
-    canExitApp():boolean{
-        if(!this.isChanged) return true;
-
-        let sub = this.openModal().subscribe({
-            next: err => { sub.unsubscribe() },
-        })
-        //вкладка
-        return false;
-    }
-
-    protected openModal():Observable<boolean> {
-        return new Observable(observer=>{
-            this.modalRef = this.modalService.show(this.dialogTemplate);
-            this.modalRef.onHidden?.subscribe(res=>{
-                if(this.userSelected == "cancel") {
-                    observer.next(false);
-                    observer.complete();
-                }
-
-                if(this.userSelected == "yes"){
-                    this.saveComments();
-                }
-
-                observer.next(true);
-                observer.complete();
-            })
-        });
-    }
-
-    protected userSelected : 'yes' | 'no' | 'cancel' = 'yes'
-
-    protected yes(){
-        this.userSelected = "yes";
-        this.modalRef?.hide();
-    }
-
-    protected no(){
-        this.userSelected = "no";
-        this.modalRef?.hide();
-    }
-
-    protected cancel(){
-        this.userSelected = "cancel";
-        this.modalRef?.hide()
-    }
-
-
-
-
-
 
     ngOnInit(): void {
         let s = this._activatedRoute.params.subscribe((params: Params) => {
@@ -168,9 +102,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
 
     ngAfterViewInit() {
         this.canvas = new Canvas(this.canvasT?.nativeElement, {});
-        this.canvas.on("object:modified", ()=> {this.isChanged = true;});
-        this.canvas.on("object:added", ()=> {this.isChanged = true;});
-        this.canvas.on("object:removed", ()=> {this.isChanged = true;});
 
         this.canvasService.init(this.canvas);
 
@@ -189,6 +120,55 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
 
     ngOnDestroy(): void {
         this._subs.unsubscribe();
+    }
+
+    canDeactivate(): Observable<boolean> | boolean{
+        if(this.canvasService.IsChanged)
+            return this.openModal();
+        else return true;
+    }
+
+    canExitApp():boolean{
+        if(!this.canvasService.IsChanged) return true;
+
+        let sub = this.openModal().subscribe({
+            next: err => { sub.unsubscribe() },
+        })
+        return false;
+    }
+
+    protected openModal():Observable<boolean> {
+        return new Observable(observer=>{
+            this.modalRef = this.modalService.show(this.dialogTemplate);
+            this.modalRef.onHidden?.subscribe(res=>{
+                if(this.userSelected == "cancel") {
+                    observer.next(false);
+                    observer.complete();
+                }
+
+                if(this.userSelected == "yes"){
+                    this.saveComments();
+                }
+
+                observer.next(true);
+                observer.complete();
+            })
+        });
+    }
+
+    protected yes(){
+        this.userSelected = "yes";
+        this.modalRef?.hide();
+    }
+
+    protected no(){
+        this.userSelected = "no";
+        this.modalRef?.hide();
+    }
+
+    protected cancel(){
+        this.userSelected = "cancel";
+        this.modalRef?.hide()
     }
 
     private operateDoc(doc: Document | null | undefined) {
@@ -229,7 +209,7 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
                     }
                 }
                 this.canvas?.renderAll();
-                this.isChanged = false;
+                this.canvasService.IsChanged = false;
 
             }
         }
@@ -245,8 +225,6 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
                 next: (docs) => {
                     if (docs && docs.length)
                         this.canvasService.loadComments(docs[0].data);
-
-                    this.isChanged = false;
                 },
                 error: (error) => {
                     console.error(`[DocumentComponent] GetDocument(${doc.id}) error`, error);
@@ -319,7 +297,7 @@ export class DocumentComponent implements OnInit, AfterViewInit, OnDestroy, CanD
 
             this.docsService.SaveCommentsForDocument(docComm).subscribe({
                 next: (doc) => {
-                    this.isChanged = false;
+                    this.canvasService.IsChanged = false;
                 },
                 error: (error) => {
                     console.error("SAVED", error)

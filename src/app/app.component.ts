@@ -4,7 +4,6 @@ import {RouterOutlet} from '@angular/router';
 import {AlertsComponent} from './components/alerts/alerts.component';
 import {CanDeactivateComponent} from './can_deactivate_guard';
 
-
 @Component({
   selector: 'app-root',
   imports: [CommonModule, RouterOutlet, AlertsComponent],

@@ -11,11 +11,10 @@ export class CanvasService implements OnDestroy {
     public ZoomLevel = signal(1);
     public CreateCommentOnMouseDown = signal(CommentType.None);
     public Error: BehaviorSubject<string> = new BehaviorSubject<string>('');
-
     public CommentParam: any;
+    public IsChanged:boolean = false;
 
     private canvas: Canvas | undefined;
-
     private readonly _zoomMultiplier = 1.18;
     private _scrollY = 0;
     private _scrollX = 0;
@@ -24,12 +23,9 @@ export class CanvasService implements OnDestroy {
     private _touchPanStart: { x: number; y: number; } | null = null;
     private _isMovingViewPort = false;
     private _mouseDownPoint = new Point(0, 0);
-
     private _maxHeight = -1;
     private _maxWidth = -1;
-
     private _subs: Subscription;
-
     private commentsMap: Map<FabricObject, CommentBase> = new Map();
 
     constructor() {
@@ -80,6 +76,10 @@ export class CanvasService implements OnDestroy {
         this.canvas.on('mouse:down:before', (e: any) => this.onMouseDown(e));
         this.canvas.on('mouse:wheel', (e: any) => this.onMouseWheel(e));
         this.canvas.on('contextmenu', (e: any) => e.e.preventDefault());
+
+        this.canvas.on("object:modified", ()=> {this.IsChanged = true;});
+        this.canvas.on("object:added", ()=> {this.IsChanged = true;});
+        this.canvas.on("object:removed", ()=> {this.IsChanged = true;});
     }
 
     public setMaxDimensions(width: number, height: number) {
@@ -166,6 +166,7 @@ export class CanvasService implements OnDestroy {
                             this.commentsMap.set(el, c);
                             c.init(commentData);
                             this.canvas?.add(el);
+                            this.IsChanged = false;
                         },
                         error: (err) => {
                             console.error("Error while creating comment", err);
